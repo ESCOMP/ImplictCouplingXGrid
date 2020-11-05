@@ -318,10 +318,31 @@ module Mediator
       type(ESMF_Field)                        :: field
       character(len=80)                       :: connectedValue
       character(len=20)                       :: transferAction
+      type(ESMF_StateIntent_Flag)             :: stateIntent
+      character(len=80)                       :: transferActionAttr
       character(len=80), allocatable          :: itemNameList(:)
       type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
     
       if (present(rc)) rc = ESMF_SUCCESS
+
+      call ESMF_StateGet(state, stateIntent=stateIntent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      if (stateIntent == ESMF_STATEINTENT_EXPORT) then
+        transferActionAttr="ProducerTransferAction"
+      elseif (stateIntent == ESMF_STATEINTENT_IMPORT) then
+        transferActionAttr="ProducerTransferAction"
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="The stateIntent must either be IMPORT or EXPORT here.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif 
     
       call ESMF_StateGet(state, name=stateName, nestedFlag=.true., &
         itemCount=itemCount, rc=rc)
@@ -362,12 +383,13 @@ module Mediator
               file=__FILE__)) &
               return  ! bail out
           else
-            call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
+            call NUOPC_GetAttribute(field, name=transferActionAttr, &
               value=transferAction, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=__FILE__)) &
               return  ! bail out
+            print *, 'from mediator: transferAction = ', trim(transferAction)
             if (trim(transferAction)=="provide") then
               ! the Connector instructed the Mediator to provide geom object
               call ESMF_LogSetError(ESMF_RC_NOT_VALID, &

@@ -121,7 +121,7 @@ module ATM
 
     ! exportable field: e
     call NUOPC_Advertise(exportState, &
-      StandardName="e", rc=rc)
+      StandardName="e", transferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
