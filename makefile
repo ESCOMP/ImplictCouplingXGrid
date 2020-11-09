@@ -54,7 +54,7 @@ driver.o: mediator.o lnd.o atm.o
 # -----------------------------------------------------------------------------
 .PHONY: dust clean distclean info edit
 dust:
-	rm -f PET*.ESMF_LogFile med_imp_*.nc med_exp_*.nc atm_imp_*.nc lnd_imp_*.nc lnd_exp_*.nc atm_exp_*.nc med_xgrid*.vtk *.stdout
+	rm -f PET*.ESMF_LogFile med_imp_*.nc med_exp_*.nc atm_imp_*.nc lnd_imp_*.nc lnd_exp_*.nc atm_exp_*.nc med_xgrid*.vtk *.stdout F0*.nc F0*.vtk
 clean:
 	rm -f app *.o *.mod
 distclean: dust clean

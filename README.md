@@ -11,6 +11,6 @@ Application demonstrating ESMF exchange grid with implicit atmosphere-land coupl
 
 Note:
 
-Tested with ESMF version hash: 406ff0a9ec7e157ce45853da1264e4ecca668e1e (8 series)
+Tested with ESMF version hash: 8.1bs36 (8.1 series)
 
 Run mpirun -np 4 ./app
