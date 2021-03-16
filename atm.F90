@@ -158,6 +158,11 @@ module ATM
     type(ESMF_Grid)                   :: gridIn, gridOut
     integer                           :: i, j
     real(kind=ESMF_KIND_R8),  pointer :: lonPtr(:,:), latPtr(:,:)
+
+    integer, allocatable :: ims(:,:), jms(:,:)
+    integer, parameter :: nTile = 6
+    integer, parameter :: nx = 1
+    integer, parameter :: ny = 1
     
     rc = ESMF_SUCCESS
     
@@ -198,11 +203,26 @@ module ATM
        staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=rc)
 #endif
-#if 1
+#if 0
     gridIn = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/50, 50/), &
       minCornerCoord=(/0._ESMF_KIND_R8, -50._ESMF_KIND_R8/), &
       maxCornerCoord=(/360._ESMF_KIND_R8, 70._ESMF_KIND_R8/), &
       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), name="ATM-Grid", rc=rc)
+#endif
+
+#if 1
+
+    allocate(ims(nx, nTile), stat=rc)
+    allocate(jms(ny, nTile), stat=rc)
+    ! for now, setup on 6 processors only with nx=ny=1
+    ims = 48
+    jms = 48
+    ! c48
+    gridIn = ESMF_GridCreateCubedSphere(48,countsPerDEDim1PTile=ims, &
+                      countsPerDEDim2PTile=jms ,name="ATM-Grid", &
+                      staggerLocList=[ESMF_STAGGERLOC_CENTER,ESMF_STAGGERLOC_CORNER], coordSys=ESMF_COORDSYS_SPH_RAD, rc=rc)
+
+    print *,'Cubed sphere grid create returned ', rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &

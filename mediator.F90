@@ -653,7 +653,15 @@ module Mediator
 
     type(ESMF_Field)     :: field
     type(ESMF_Grid)      :: grid1, grid2
-    
+
+    integer :: sideAGridCount, sideAMeshCount, &
+         dimCount, elementCount
+    type(ESMF_XGridSpec), allocatable :: sparseMatX2A(:)
+    type(ESMF_VM) :: vm
+    integer :: mype
+
+    real(ESMF_KIND_R8), allocatable :: centroid(:,:)
+    integer :: unit, i
     rc = ESMF_SUCCESS
 
     call ESMF_StateGet(frLND, 'DeltaT_L', field=field, rc=rc)
@@ -689,6 +697,72 @@ module Mediator
       file=__FILE__)) &
       return  ! bail out
 #endif
+
+!ALT query the xgrid
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_VMGet(VM, localPet=mype, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    call ESMF_XGridGet(xgrid, sideAGridCount=sideAGridCount, &
+         sideAMeshCount=sideAMeshCount, dimCount=dimCount, &
+         elementCount=elementcount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+
+    print *,'xgrid grid returned ', rc, sideAGridCount, sideAMeshCount, &
+         dimCount, elementCount
+
+    allocate(centroid(elementCount, dimCount), stat=rc)
+    call ESMF_XGridGet(xgrid, centroid=centroid,rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+
+
+    call ESMF_XGridGet(xgrid, sparseMatX2A=sparseMatX2A,rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+
+
+    allocate(sparseMatX2A(sideAGridCount+sideAMeshCount), stat=rc)
+    call ESMF_XGridGet(xgrid, sparseMatX2A=sparseMatX2A,rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    unit=31
+    open(unit=unit,file='xgrid.'//char(mype+ichar('0')), form='formatted')
+
+    write (unit,*)'PE ', mype
+    write (unit,*)'xgrid centroid ',size(centroid,1),size(centroid,2)
+    do i = 1, size(centroid)
+       write (unit, *) centroid(i,:)
+    end do
+    write (unit,*)'xgrid sparseMatX2A ',size(sparseMatX2A(1)%factorIndexList)
+    do i = 1, size(sparseMatX2A(1)%factorList)
+       write (unit, *) sparseMatX2A(1)%factorIndexList(1,i), &
+            sparseMatX2A(1)%factorIndexList(2,i), &
+            sparseMatX2A(1)%factorList(i)
+    end do
+    close(unit)
+    call sleep(5)
+
 
     F0 = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1027,7 +1101,7 @@ module Mediator
       file=__FILE__)) &
       return  ! bail out
 
-#if 1
+#if 0
     call ESMF_FieldWrite(F0, filename='F0.nc', overwrite=.true., timeslice=impslice+1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1035,7 +1109,7 @@ module Mediator
       return  ! bail out
 #endif
 
-#if 1 
+#if 0 
     call ESMF_FieldGet(F0, array=f0a, xgrid=ixgrid, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &

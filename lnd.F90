@@ -158,9 +158,9 @@ module Lnd
     !   maxCornerCoord=(/49.0_ESMF_KIND_R8,49.0_ESMF_KIND_R8/), &
     !   staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
     !   rc=rc)
-    gridIn = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/40, 40/), &
-      minCornerCoord=(/0._ESMF_KIND_R8, -50._ESMF_KIND_R8/), &
-      maxCornerCoord=(/360._ESMF_KIND_R8, 70._ESMF_KIND_R8/), &
+    gridIn = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/360, 180/), &
+      minCornerCoord=(/-180._ESMF_KIND_R8, -90._ESMF_KIND_R8/), &
+      maxCornerCoord=(/180._ESMF_KIND_R8, 90._ESMF_KIND_R8/), &
       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), name="LND-Grid", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &

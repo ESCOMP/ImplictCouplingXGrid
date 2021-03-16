@@ -113,8 +113,10 @@ module Driver
       return  ! bail out
 
      ! SetServices for Mediator with petList on first half of PETs
-    allocate(petList(petCount/2))
-    do i=1, petCount/2
+!    allocate(petList(petCount/2))
+    allocate(petList(petCount))
+!    do i=1, petCount/2
+    do i=1, petCount
       petList(i) = i-1 ! PET labeling goes from 0 to petCount-1
     enddo
     call NUOPC_DriverAddComp(driver, "Mediator", medSS, petList=petList, &
